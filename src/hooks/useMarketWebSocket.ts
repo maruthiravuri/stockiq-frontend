@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
-const WS_URL = process.env.REACT_APP_WS_URL || 'http://localhost:8082/ws/quotes';
+const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8082/ws/quotes';
 
 interface QuoteUpdate {
   symbol: string;

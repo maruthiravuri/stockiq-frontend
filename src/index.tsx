@@ -6,4 +6,8 @@ import '@fontsource/ibm-plex-mono/600.css';
 import '@fontsource/ibm-plex-mono/700.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(<React.StrictMode><App /></React.StrictMode>);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

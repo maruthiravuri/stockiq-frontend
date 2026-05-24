@@ -1,0 +1,15 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        brand: { primary: '#00D4AA', secondary: '#6C8EEF', danger: '#FF4D6A', warning: '#FFB84D' },
+      },
+      fontFamily: { mono: ['"IBM Plex Mono"', 'monospace'] },
+    },
+  },
+  plugins: [],
+  corePlugins: { preflight: false },
+};

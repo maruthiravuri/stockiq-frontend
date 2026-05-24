@@ -1,0 +1,30 @@
+# StockIQ Frontend — Code Owners
+# These owners are automatically requested for review on PRs
+
+# Global owner
+* @maruthiravuri
+
+# Core infrastructure
+/.github/           @maruthiravuri
+/src/store/         @maruthiravuri
+/src/theme/         @maruthiravuri
+/src/types/         @maruthiravuri
+
+# Research tabs
+/src/components/research/  @maruthiravuri
+
+# Portfolio features
+/src/components/portfolio/ @maruthiravuri
+
+# Shared components
+/src/components/common/    @maruthiravuri
+
+# Search & Screener
+/src/components/search/    @maruthiravuri
+/src/components/screener/  @maruthiravuri
+
+# E2E Tests
+/e2e/              @maruthiravuri
+
+# CI/CD
+/.github/workflows/ @maruthiravuri

@@ -12,6 +12,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import PieChartIcon from '@mui/icons-material/PieChart';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 const NAV_ITEMS = [
   { id: 'mag7', label: 'Magnificent 7', icon: <AutoGraphIcon fontSize="small" />, group: 'Research' },
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { id: 'ai', label: 'AI Stocks & ETFs', icon: <PsychologyIcon fontSize="small" />, group: 'Research' },
   { id: 'metals', label: 'Metals ETFs', icon: <DiamondIcon fontSize="small" />, group: 'Research' },
   { id: 'crypto', label: 'Crypto Top 5', icon: <CurrencyBitcoinIcon fontSize="small" />, group: 'Research' },
+  { id: 'screener', label: 'Screener', icon: <FilterAltIcon fontSize="small" />, group: 'Research' },
   { id: 'portfolio', label: 'My Portfolio', icon: <AccountBalanceWalletIcon fontSize="small" />, group: 'Portfolio' },
   { id: 'watchlist', label: 'Watchlist', icon: <StarBorderIcon fontSize="small" />, group: 'Portfolio' },
   { id: 'allocation', label: 'Allocation', icon: <PieChartIcon fontSize="small" />, group: 'Portfolio' },
@@ -73,10 +75,7 @@ const Sidebar: React.FC<{ open: boolean }> = ({ open }) => {
                       {item.icon}
                     </ListItemIcon>
                     {open && (
-                      <ListItemText
-                        primary={item.label}
-                        slotProps={{ primary: { variant: 'body2', noWrap: true } as any }}
-                      />
+                      <ListItemText primary={item.label} slotProps={{ primary: { variant: 'body2', noWrap: true } as any }} />
                     )}
                   </ListItemButton>
                 </Tooltip>

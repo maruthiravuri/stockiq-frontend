@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Grid, Paper, Typography, Chip } from '@mui/material';
+import React from 'react';
+import { Box, Grid, Paper, Typography, Chip, CircularProgress, Alert } from '@mui/material';
+import { useMag7 } from '../../hooks/useApi';
 import { MAG7_STOCKS } from '../../services/mockData';
-import { Stock } from '../../types';
 import { fmtPrice, fmtPct, fmtChange, fmtLargeNum } from '../../utils/format';
 import Sparkline from '../common/Sparkline';
+import AgStockTable from '../common/AgStockTable';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import StockTable from '../common/StockTable';
 
-const StockCard: React.FC<{ stock: Stock }> = ({ stock }) => {
+const StockCard: React.FC<{ stock: any }> = ({ stock }) => {
   const isUp = stock.change >= 0;
   const color = isUp ? 'success.main' : 'error.main';
-
   return (
     <Paper sx={{ p: 1.5, display: 'flex', flexDirection: 'column', gap: 0.75, height: 140 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -21,7 +20,7 @@ const StockCard: React.FC<{ stock: Stock }> = ({ stock }) => {
             {stock.name}
           </Typography>
         </Box>
-        <Chip label={stock.sector} size="small" sx={{ fontSize: '0.6rem', height: 18, bgcolor: 'rgba(0,212,170,0.1)', color: 'primary.main', border: '1px solid rgba(0,212,170,0.2)' }} />
+        <Chip label={stock.sector || 'Tech'} size="small" sx={{ fontSize: '0.6rem', height: 18, bgcolor: 'rgba(0,212,170,0.1)', color: 'primary.main' }} />
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>{fmtPrice(stock.price)}</Typography>
@@ -30,45 +29,57 @@ const StockCard: React.FC<{ stock: Stock }> = ({ stock }) => {
           <Typography variant="caption" sx={{ color, fontWeight: 600 }}>{fmtPct(stock.changePercent)}</Typography>
         </Box>
       </Box>
-      <Box sx={{ flex: 1, minHeight: 0 }}>
+      <Box sx={{ flex: 1 }}>
         <Sparkline basePrice={stock.price} change={stock.change} height={32} />
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography variant="caption" color="text.secondary">Mkt Cap: <span style={{ color: 'inherit' }}>{fmtLargeNum(stock.marketCap)}</span></Typography>
-        <Typography variant="caption" sx={{ color }}>
-          {fmtChange(stock.change)}
-        </Typography>
+        <Typography variant="caption" color="text.secondary">{stock.marketCap ? fmtLargeNum(stock.marketCap) : ''}</Typography>
+        <Typography variant="caption" sx={{ color }}>{fmtChange(stock.change)}</Typography>
       </Box>
     </Paper>
   );
 };
 
 const Mag7Tab: React.FC = () => {
-  const [stocks, setStocks] = useState<Stock[]>(MAG7_STOCKS);
+  const { data: apiData, isLoading, isError } = useMag7();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStocks(prev => prev.map(s => {
-        const delta = (Math.random() - 0.49) * s.price * 0.001;
-        const newPrice = parseFloat((s.price + delta).toFixed(2));
-        const newChange = parseFloat((s.change + delta).toFixed(2));
-        return { ...s, price: newPrice, change: newChange, changePercent: parseFloat(((newChange / s.previousClose) * 100).toFixed(2)) };
-      }));
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
+  // Use real API data when available, fall back to mock
+  const stocks = apiData && apiData.length > 0
+    ? apiData.map(q => ({
+        symbol: q.symbol, name: q.name, price: q.price,
+        change: q.change, changePercent: q.changePercent,
+        volume: q.volume, marketCap: q.marketCap || 0,
+        high: q.high, low: q.low, open: q.open,
+        previousClose: q.previousClose, sector: 'Technology',
+        peRatio: q.peRatio || undefined,
+        weekHigh52: q.weekHigh52 || undefined,
+        beta: undefined, pbRatio: undefined, dividendYield: undefined, eps: undefined, weekLow52: undefined,
+      }))
+    : MAG7_STOCKS;
 
   return (
     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflowY: 'auto' }}>
+      {isLoading && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+          <CircularProgress size={14} /> <Typography variant="caption">Loading live data...</Typography>
+        </Box>
+      )}
+      {isError && (
+        <Alert severity="info" sx={{ fontSize: '0.75rem', py: 0.5 }}>
+          Using demo data — connect backend for live prices
+        </Alert>
+      )}
       <Grid container spacing={1.5}>
         {stocks.map(stock => (
-          <Grid size={{ xs: 6, sm: 4, md: 3, lg: 1.714 }} key={stock.symbol}>
+          <Grid item xs={6} sm={4} md={3} lg={12 / 7 as any} key={stock.symbol}>
             <StockCard stock={stock} />
           </Grid>
         ))}
       </Grid>
       <Paper sx={{ flex: 1, minHeight: 300 }}>
-        <StockTable data={stocks} title="Magnificent 7 Detail" subtitle="Real-time prices · refreshes every 4s" showExtra />
+        <AgStockTable data={stocks as any} title="Magnificent 7 Detail"
+          subtitle={apiData ? 'Live data via Alpha Vantage' : 'Demo data — start backend for live prices'}
+          showExtra />
       </Paper>
     </Box>
   );

@@ -5,8 +5,9 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 3000, open: true },
   define: {
-    // sockjs-client uses Node's 'global' — polyfill it for the browser
+    // sockjs-client uses Node globals — polyfill for browser
     global: 'globalThis',
+    'process.env': {},
   },
   build: {
     outDir: 'build',

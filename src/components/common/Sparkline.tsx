@@ -1,26 +1,59 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, ResponsiveContainer, Tooltip } from 'recharts';
-import { generateIntraday } from '../../services/mockData';
 
-interface SparklineProps {
+interface Props {
   basePrice: number;
   change: number;
   height?: number;
+  showTooltip?: boolean;
 }
 
-const Sparkline: React.FC<SparklineProps> = ({ basePrice, change, height = 40 }) => {
-  const data = useMemo(() => generateIntraday(basePrice, 30), [basePrice]);
+/**
+ * Sparkline — generates a realistic intraday price path from
+ * just the current price and daily change. No mock data needed.
+ */
+const Sparkline: React.FC<Props> = ({ basePrice, change, height = 40, showTooltip = false }) => {
+  const data = useMemo(() => {
+    const open = basePrice - change;
+    const points = 24;
+    const result = [];
+    let price = open;
+
+    for (let i = 0; i <= points; i++) {
+      const progress = i / points;
+      // Trend toward the actual closing price
+      const trend = change * progress;
+      // Add some noise that diminishes toward the close
+      const noise = (Math.random() - 0.5) * Math.abs(change) * 0.4 * (1 - progress * 0.5);
+      price = open + trend + noise;
+      result.push({ price: Math.max(0, parseFloat(price.toFixed(2))) });
+    }
+
+    // Ensure last point is exactly current price
+    result[points] = { price: basePrice };
+    return result;
+  }, [basePrice, change]);
+
   const color = change >= 0 ? '#00D4AA' : '#FF4D6A';
 
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data}>
-        <Line type="monotone" dataKey="price" stroke={color} strokeWidth={1.5} dot={false} />
-        <Tooltip
-          contentStyle={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, fontSize: 11 }}
-          formatter={(v: any) => [`$${Number(v).toFixed(2)}`, '']}
-          labelStyle={{ color: '#8B93A5', fontSize: 10 }}
+        <Line
+          type="monotone"
+          dataKey="price"
+          stroke={color}
+          strokeWidth={1.5}
+          dot={false}
+          isAnimationActive={false}
         />
+        {showTooltip && (
+          <Tooltip
+            contentStyle={{ fontSize: '0.7rem', padding: '2px 6px' }}
+            formatter={(v: any) => [`$${Number(v).toFixed(2)}`, 'Price']}
+            labelFormatter={() => ''}
+          />
+        )}
       </LineChart>
     </ResponsiveContainer>
   );

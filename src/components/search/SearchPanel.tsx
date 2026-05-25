@@ -1,41 +1,40 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Box, Paper, Typography, InputBase, Chip } from '@mui/material';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Box, InputBase, Paper, Typography, List, ListItemButton, Chip,
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useDispatch } from 'react-redux';
-import { setActiveTab, setSelectedSymbol } from '../../store';
-import { MAG7_STOCKS, SP100_MOVERS, SP500_VALUE, AI_STOCKS, METALS_ETFS } from '../../services/mockData';
-import { fmtPrice, fmtPct } from '../../utils/format';
+import { setActiveTab } from '../../store';
+import { STOCK_UNIVERSE, MAG7_SYMBOLS, AI_STOCK_SYMBOLS, BUFFETT_SYMBOLS, RECURRING_SYMBOLS } from '../../config/research';
 
-const ALL_SECURITIES = [
-  ...MAG7_STOCKS, ...SP100_MOVERS, ...SP500_VALUE, ...AI_STOCKS,
-  ...METALS_ETFS.map(e => ({ ...e, sector: e.category || 'ETF' })),
-];
+// Build a searchable universe from all known symbols
+const SEARCH_UNIVERSE = Array.from(
+  new Map([
+    ...STOCK_UNIVERSE,
+    ...MAG7_SYMBOLS,
+    ...AI_STOCK_SYMBOLS,
+    ...BUFFETT_SYMBOLS,
+    ...RECURRING_SYMBOLS,
+  ].map(s => [s.symbol, s])).values()
+);
 
 const SearchPanel: React.FC = () => {
-  const dispatch = useDispatch();
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
+  const ref = useRef<HTMLDivElement>(null);
 
   const results = query.length >= 1
-    ? ALL_SECURITIES.filter(s =>
-        s.symbol.toUpperCase().includes(query.toUpperCase()) ||
+    ? SEARCH_UNIVERSE.filter(s =>
+        s.symbol.toUpperCase().startsWith(query.toUpperCase()) ||
         s.name.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 10)
+      ).slice(0, 8)
     : [];
 
-  const handleSelect = useCallback((symbol: string) => {
-    dispatch(setSelectedSymbol(symbol));
-    setQuery('');
-    setOpen(false);
-  }, [dispatch]);
-
+  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
@@ -43,79 +42,65 @@ const SearchPanel: React.FC = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const handleSelect = (symbol: string) => {
+    // Navigate to the most relevant tab for this symbol
+    const isInMag7 = MAG7_SYMBOLS.some(s => s.symbol === symbol);
+    const isRecurring = RECURRING_SYMBOLS.some(s => s.symbol === symbol);
+    const isBuffett = BUFFETT_SYMBOLS.some(s => s.symbol === symbol);
+    const isAI = AI_STOCK_SYMBOLS.some(s => s.symbol === symbol);
+
+    if (isInMag7) dispatch(setActiveTab('mag7'));
+    else if (isRecurring) dispatch(setActiveTab('recurring'));
+    else if (isBuffett) dispatch(setActiveTab('buffett'));
+    else if (isAI) dispatch(setActiveTab('ai'));
+    else dispatch(setActiveTab('screener'));
+
+    setQuery('');
+    setOpen(false);
+  };
+
   return (
-    <Box ref={panelRef} sx={{ position: 'relative', flex: 1, maxWidth: 380 }}>
-      <Box sx={{
+    <Box ref={ref} sx={{ position: 'relative', flex: 1, maxWidth: 320 }}>
+      <Paper sx={{
         display: 'flex', alignItems: 'center', gap: 1,
-        bgcolor: theme => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-        borderRadius: 1.5, px: 1.5, py: 0.5,
-        border: open ? '1px solid' : '1px solid transparent',
-        borderColor: open ? 'primary.main' : 'transparent',
-        transition: 'border-color 0.2s',
+        px: 1.5, py: 0.5, height: 32,
+        bgcolor: 'rgba(255,255,255,0.05)', border: '1px solid',
+        borderColor: open ? 'primary.main' : 'divider',
+        borderRadius: 1, transition: 'border-color 0.15s',
       }}>
         <SearchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
         <InputBase
-          ref={inputRef}
-          placeholder="Search symbol or company..."
+          placeholder="Search symbol or name..."
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
-          sx={{ fontSize: '0.8rem', color: 'text.primary', flex: 1 }}
-          inputProps={{ 'aria-label': 'search stocks and ETFs' }}
+          sx={{ fontSize: '0.8rem', flex: 1, '& input': { p: 0 } }}
         />
-        {query && (
-          <CloseIcon
-            sx={{ fontSize: 14, color: 'text.secondary', cursor: 'pointer' }}
-            onClick={() => { setQuery(''); setOpen(false); }}
-          />
-        )}
-      </Box>
+      </Paper>
 
       {open && results.length > 0 && (
         <Paper sx={{
-          position: 'absolute', top: '100%', left: 0, right: 0, mt: 0.5, zIndex: 1300,
-          maxHeight: 380, overflowY: 'auto', border: '1px solid', borderColor: 'divider',
+          position: 'absolute', top: '100%', left: 0, right: 0, mt: 0.5,
+          zIndex: 1300, maxHeight: 320, overflowY: 'auto',
+          border: '1px solid', borderColor: 'divider',
         }}>
-          {results.map(stock => {
-            const isUp = stock.change >= 0;
-            return (
-              <Box
-                key={stock.symbol}
-                onClick={() => handleSelect(stock.symbol)}
-                sx={{
-                  px: 1.5, py: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1.5,
-                  borderBottom: '1px solid', borderColor: 'divider',
-                  '&:hover': { bgcolor: theme => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' },
-                  '&:last-child': { borderBottom: 'none' },
-                }}
-              >
-                <TrendingUpIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>{stock.symbol}</Typography>
-                    <Chip label={stock.sector || 'Stock'} size="small" sx={{ height: 16, fontSize: '0.6rem' }} />
+          <List dense disablePadding>
+            {results.map(s => (
+              <ListItemButton key={s.symbol} onClick={() => handleSelect(s.symbol)}
+                sx={{ px: 1.5, py: 0.75 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', gap: 1 }}>
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                      {s.symbol}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">{s.name}</Typography>
                   </Box>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {stock.name}
-                  </Typography>
+                  <Chip label={(s as any).sector ?? 'Stock'} size="small"
+                    sx={{ height: 16, fontSize: '0.6rem', flexShrink: 0 }} />
                 </Box>
-                <Box sx={{ textAlign: 'right' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{fmtPrice(stock.price)}</Typography>
-                  <Typography variant="caption" sx={{ color: isUp ? 'success.main' : 'error.main' }}>
-                    {fmtPct(stock.changePercent)}
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          })}
-        </Paper>
-      )}
-
-      {open && query.length >= 2 && results.length === 0 && (
-        <Paper sx={{ position: 'absolute', top: '100%', left: 0, right: 0, mt: 0.5, zIndex: 1300, p: 2 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-            No results for "{query}"
-          </Typography>
+              </ListItemButton>
+            ))}
+          </List>
         </Paper>
       )}
     </Box>

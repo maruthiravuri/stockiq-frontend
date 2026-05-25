@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import {
   Box, Paper, Typography, Chip, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, CircularProgress,
+  TableContainer, TableHead, TableRow, CircularProgress, Alert,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -19,19 +19,19 @@ import AgStockTable from '../common/AgStockTable';
 function mergeWithLive(mockData: any[], liveMap: Record<string, any>) {
   return mockData.map(item => {
     const live = liveMap[item.symbol];
-    if (!live) return item;
+    if (!live) return null;
     return {
       ...item,
-      price:         Number(live.price)                    || item.price         || 0,
-      change:        Number(live.change)                   || item.change        || 0,
-      changePercent: Number(live.changePercent)            || item.changePercent || 0,
+      price:         Number(live.price)        || 0,
+      change:        Number(live.change)        || 0,
+      changePercent: Number(live.changePercent)  || 0,
       high:          Number(live.high   ?? item.high)      || 0,
       low:           Number(live.low    ?? item.low)       || 0,
       open:          Number(live.open   ?? item.open)      || 0,
       previousClose: Number(live.previousClose ?? item.previousClose) || 0,
       volume:        Number(live.volume ?? item.volume)    || 0,
     };
-  });
+  }).filter(Boolean);
 }
 
 function useLiveMerge(mockData: any[]) {
@@ -42,30 +42,39 @@ function useLiveMerge(mockData: any[]) {
     return Object.fromEntries(quotes.map(q => [q.symbol, q]));
   }, [quotes]);
   const merged = useMemo(() => mergeWithLive(mockData, liveMap), [mockData, liveMap]);
-  return { data: merged, isLoading, isError, hasLive: !!quotes?.length };
+  return { data: merged, isLoading, isError, hasData: merged.length > 0 };
 }
 
-function LiveBadge({ isLoading, hasLive, isError }: { isLoading: boolean; hasLive: boolean; isError: boolean }) {
-  if (isLoading) return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-      <CircularProgress size={10} />
-      <Typography variant="caption" color="text.secondary">Loading live prices...</Typography>
+function LiveBadge({ isLoading }: { isLoading: boolean }) {
+  if (isLoading) return <CircularProgress size={12} />;
+  return <Chip label="● LIVE" size="small"
+    sx={{ height: 18, fontSize: '0.62rem', bgcolor: 'rgba(0,212,170,0.15)', color: 'success.main', fontWeight: 700 }} />;
+}
+
+function LoadingState() {
+  return (
+    <Box sx={{ p: 4, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <CircularProgress size={18} />
+      <Typography color="text.secondary">Loading live data...</Typography>
     </Box>
   );
-  if (hasLive) return (
-    <Chip label="● LIVE" size="small"
-      sx={{ height: 18, fontSize: '0.62rem', bgcolor: 'rgba(0,212,170,0.15)', color: 'success.main', fontWeight: 700 }} />
+}
+
+function ErrorState({ name }: { name: string }) {
+  return (
+    <Box sx={{ p: 4 }}>
+      <Alert severity="warning" sx={{ maxWidth: 480 }}>
+        Could not load {name}. Make sure the backend is running at <strong>localhost:8080</strong>.
+      </Alert>
+    </Box>
   );
-  if (isError) return (
-    <Chip label="DEMO" size="small"
-      sx={{ height: 18, fontSize: '0.62rem', bgcolor: 'rgba(255,255,255,0.06)', color: 'text.secondary' }} />
-  );
-  return null;
 }
 
 // ── SP100 Movers ──────────────────────────────────────────────────────────────
 export const SP100Tab: React.FC = () => {
-  const { data: stocks, isLoading, isError, hasLive } = useLiveMerge(SP100_SYMBOLS);
+  const { data: stocks, isLoading, isError, hasData } = useLiveMerge(SP100_SYMBOLS);
+  if (isLoading) return <LoadingState />;
+  if (!hasData) return <ErrorState name="S&P 100 Movers" />;
   const sorted = [...stocks].sort((a, b) => Math.abs(Number(b.changePercent) || 0) - Math.abs(Number(a.changePercent) || 0));
   const gainers = sorted.filter(s => (Number(s.change) || 0) >= 0).slice(0, 5);
   const losers  = sorted.filter(s => (Number(s.change) || 0) < 0).slice(0, 5);
@@ -74,7 +83,7 @@ export const SP100Tab: React.FC = () => {
     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflowY: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>S&P 100 Movers</Typography>
-        <LiveBadge isLoading={isLoading} hasLive={hasLive} isError={isError} />
+        <LiveBadge isLoading={isLoading} />
       </Box>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
@@ -124,13 +133,15 @@ export const SP100Tab: React.FC = () => {
 
 // ── SP500 Value ───────────────────────────────────────────────────────────────
 export const SP500ValueTab: React.FC = () => {
-  const { data: stocks, isLoading, hasLive, isError } = useLiveMerge(SP500_VALUE_SYMBOLS);
+  const { data: stocks, isLoading, isError, hasData } = useLiveMerge(SP500_VALUE_SYMBOLS);
+  if (isLoading) return <LoadingState />;
+  if (!hasData) return <ErrorState name="S&P 500 Value" />;
   const criteria = TAB_CRITERIA.sp500value.criteria;
   return (
     <Box sx={{ p: 2, height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>S&P 500 Value Stocks</Typography>
-        <LiveBadge isLoading={isLoading} hasLive={hasLive} isError={isError} />
+        <LiveBadge isLoading={isLoading} />
       </Box>
       {/* Active criteria — edit TAB_CRITERIA.sp500value in src/config/research.ts */}
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -152,7 +163,9 @@ export const SP500ValueTab: React.FC = () => {
 
 // ── Buffett Portfolio ─────────────────────────────────────────────────────────
 export const BuffettTab: React.FC = () => {
-  const { data: stocks, isLoading, hasLive, isError } = useLiveMerge(BUFFETT_SYMBOLS);
+  const { data: stocks, isLoading, isError, hasData } = useLiveMerge(BUFFETT_SYMBOLS);
+  if (isLoading) return <LoadingState />;
+  if (!hasData) return <ErrorState name="Buffett Portfolio" />;
   const alloc = [
     { name: 'AAPL', pct: 44.2 }, { name: 'BAC', pct: 9.3 }, { name: 'AXP', pct: 8.7 },
     { name: 'KO', pct: 7.9 },   { name: 'CVX', pct: 7.2 }, { name: 'OXY', pct: 4.8 },
@@ -164,7 +177,7 @@ export const BuffettTab: React.FC = () => {
     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflowY: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>Berkshire Hathaway Portfolio</Typography>
-        <LiveBadge isLoading={isLoading} hasLive={hasLive} isError={isError} />
+        <LiveBadge isLoading={isLoading} />
       </Box>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 5 }}>
@@ -209,7 +222,9 @@ export const BuffettTab: React.FC = () => {
 
 // ── AI Stocks & ETFs ──────────────────────────────────────────────────────────
 export const AITab: React.FC = () => {
-  const { data: aiStocks, isLoading, hasLive, isError } = useLiveMerge(AI_STOCK_SYMBOLS);
+  const { data: aiStocks, isLoading, isError, hasData } = useLiveMerge(AI_STOCK_SYMBOLS);
+  if (isLoading) return <LoadingState />;
+  if (!hasData) return <ErrorState name="AI Stocks" />;
   const aiEtfSymbols = AI_ETF_SYMBOLS.map((e: any) => e.symbol);
   const { data: etfQuotes } = useBatchQuotes(aiEtfSymbols);
   const etfMap = useMemo(() =>
@@ -223,7 +238,7 @@ export const AITab: React.FC = () => {
     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflowY: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>AI Stocks & ETFs</Typography>
-        <LiveBadge isLoading={isLoading} hasLive={hasLive} isError={isError} />
+        <LiveBadge isLoading={isLoading} />
       </Box>
       <Paper sx={{ minHeight: 280 }}>
         <StockTable data={aiStocks as any} title="AI & Semiconductor Stocks" subtitle="Primary AI/chip exposure" showExtra />
@@ -260,12 +275,14 @@ export const AITab: React.FC = () => {
 
 // ── Metals ETFs ───────────────────────────────────────────────────────────────
 export const MetalsTab: React.FC = () => {
-  const { data: etfs, isLoading, hasLive, isError } = useLiveMerge(METALS_ETF_SYMBOLS);
+  const { data: etfs, isLoading, isError, hasData } = useLiveMerge(METALS_ETF_SYMBOLS);
+  if (isLoading) return <LoadingState />;
+  if (!hasData) return <ErrorState name="Metals ETFs" />;
   return (
     <Box sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>Metals ETFs</Typography>
-        <LiveBadge isLoading={isLoading} hasLive={hasLive} isError={isError} />
+        <LiveBadge isLoading={isLoading} />
       </Box>
       <Paper>
         <TableContainer>
@@ -316,12 +333,7 @@ export const CryptoTab: React.FC = () => {
     <Box sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>Crypto Top 5</Typography>
-        {isLoading
-          ? <CircularProgress size={12} />
-          : <Chip label={hasLive ? '● LIVE' : 'DEMO'} size="small"
-              sx={{ height: 18, fontSize: '0.62rem',
-                bgcolor: hasLive ? 'rgba(0,212,170,0.15)' : 'rgba(255,255,255,0.06)',
-                color: hasLive ? 'success.main' : 'text.secondary', fontWeight: 700 }} />}
+        <LiveBadge isLoading={isLoading} />
       </Box>
       <Grid container spacing={2}>
         {assets.map((a: any) => (
@@ -355,3 +367,4 @@ export const CryptoTab: React.FC = () => {
     </Box>
   );
 };
+

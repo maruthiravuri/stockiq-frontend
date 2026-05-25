@@ -191,10 +191,12 @@ export const AI_STOCK_SYMBOLS = STOCK_UNIVERSE.filter(s =>
 );
 
 export const AI_ETF_SYMBOLS = [
-  { symbol: 'AIQ',  name: 'AI & Big Data ETF',        price: 32.18, expenseRatio: 0.68, aum: 2800000000 },
-  { symbol: 'BOTZ', name: 'Global Robotics & AI ETF', price: 28.43, expenseRatio: 0.68, aum: 2400000000 },
-  { symbol: 'ARKQ', name: 'ARK Autonomous Tech ETF',  price: 54.17, expenseRatio: 0.75, aum: 800000000 },
-  { symbol: 'ROBO', name: 'ROBO Global Robotics ETF', price: 58.92, expenseRatio: 0.95, aum: 1200000000 },
+  { symbol: 'SMH',  name: 'VanEck Semiconductor ETF',     price: 238.47, expenseRatio: 0.35, aum: 22_000_000_000 },
+  { symbol: 'SOXX', name: 'iShares Semiconductor ETF',    price: 214.83, expenseRatio: 0.35, aum: 12_000_000_000 },
+  { symbol: 'AIQ',  name: 'AI & Big Data ETF',            price: 32.18,  expenseRatio: 0.68, aum: 2_800_000_000 },
+  { symbol: 'BOTZ', name: 'Global Robotics & AI ETF',     price: 28.43,  expenseRatio: 0.68, aum: 2_400_000_000 },
+  { symbol: 'ARKQ', name: 'ARK Autonomous Tech ETF',      price: 54.17,  expenseRatio: 0.75, aum: 800_000_000 },
+  { symbol: 'ROBO', name: 'ROBO Global Robotics ETF',     price: 58.92,  expenseRatio: 0.95, aum: 1_200_000_000 },
 ];
 
 export const METALS_ETF_SYMBOLS = [

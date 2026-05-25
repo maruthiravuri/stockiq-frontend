@@ -14,6 +14,7 @@ import Mag7Tab from './components/research/Mag7Tab';
 import { SP100Tab, SP500ValueTab, BuffettTab, AITab, MetalsTab, CryptoTab } from './components/research/ResearchTabs';
 import PortfolioTabV2 from './components/portfolio/PortfolioTabV2';
 import DividendEtfTab from './components/research/DividendEtfTab';
+import RecurringTab from './components/research/RecurringTab';
 import WatchlistTabV2 from './components/portfolio/WatchlistTabV2';
 import AllocationTab from './components/portfolio/AllocationTab';
 import ScreenerTab from './components/screener/ScreenerTab';
@@ -36,6 +37,7 @@ const TAB_MAP: Record<string, React.ReactNode> = {
   metals: <MetalsTab />,
   crypto: <CryptoTab />,
   dividendetfs: <DividendEtfTab />,
+  recurring: <RecurringTab />,
   screener: <ScreenerTab />,
   portfolio: <PortfolioTabV2 />,
   watchlist: <WatchlistTabV2 />,

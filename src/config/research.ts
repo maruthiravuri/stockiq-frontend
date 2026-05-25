@@ -308,3 +308,36 @@ export const DIVIDEND_ETF_CRITERIA: TabCriteria = {
     { field: 'expenseRatio',  operator: '<=', value: 0.55, label: 'Expense ratio ≤ 0.55%' },
   ],
 };
+
+// ─────────────────────────────────────────────────────────────
+//  RECURRING INVESTMENTS
+//  Stocks and ETFs suitable for regular DCA / recurring buys
+// ─────────────────────────────────────────────────────────────
+
+export interface RecurringHolding {
+  symbol: string;
+  name: string;
+  price: number;
+  type: 'ETF' | 'Stock';
+  sector: string;
+  why: string;            // one-line investment thesis
+  expenseRatio?: number;  // for ETFs
+  dividendYield?: number;
+}
+
+export const RECURRING_SYMBOLS: RecurringHolding[] = [
+  // ── Core ETFs ─────────────────────────────────────────────
+  { symbol: 'VOO',  name: 'Vanguard S&P 500 ETF',         price: 492.18, type: 'ETF',   sector: 'Broad Market',  why: 'Core US large-cap index — buy and hold forever',         expenseRatio: 0.03, dividendYield: 1.3 },
+  { symbol: 'QQQ',  name: 'Invesco QQQ Trust',             price: 448.62, type: 'ETF',   sector: 'Technology',    why: 'NASDAQ-100 — top 100 non-financial NASDAQ companies',    expenseRatio: 0.20, dividendYield: 0.6 },
+  { symbol: 'QQQM', name: 'Invesco NASDAQ 100 ETF',        price: 204.37, type: 'ETF',   sector: 'Technology',    why: 'Same as QQQ, lower cost — better for long-term DCA',    expenseRatio: 0.15, dividendYield: 0.6 },
+  { symbol: 'SCHD', name: 'Schwab US Dividend Equity ETF', price: 77.42,  type: 'ETF',   sector: 'Dividend',      why: 'Quality dividend growth — income + appreciation',        expenseRatio: 0.06, dividendYield: 3.5 },
+  { symbol: 'VXUS', name: 'Vanguard Total Intl Stock ETF', price: 62.18,  type: 'ETF',   sector: 'International', why: 'Ex-US diversification — Europe, Asia, emerging markets', expenseRatio: 0.07, dividendYield: 3.1 },
+  { symbol: 'GLD',  name: 'SPDR Gold Shares',              price: 187.34, type: 'ETF',   sector: 'Commodities',   why: 'Inflation hedge and safe haven — store of value',        expenseRatio: 0.40, dividendYield: 0   },
+  { symbol: 'SMH',  name: 'VanEck Semiconductor ETF',      price: 238.47, type: 'ETF',   sector: 'Technology',    why: 'Semiconductor leaders — NVDA, TSM, AVGO, AMD, ASML',   expenseRatio: 0.35, dividendYield: 0.6 },
+  { symbol: 'SOXX', name: 'iShares Semiconductor ETF',     price: 214.83, type: 'ETF',   sector: 'Technology',    why: 'Broader chip exposure — 30 semiconductor companies',    expenseRatio: 0.35, dividendYield: 0.9 },
+  // ── Individual Stocks ─────────────────────────────────────
+  { symbol: 'COST', name: 'Costco Wholesale',              price: 712.44, type: 'Stock', sector: 'Consumer Staples',   why: 'Membership moat — loyal customer base, consistent growth'  },
+  { symbol: 'GOOGL',name: 'Alphabet Inc.',                 price: 152.19, type: 'Stock', sector: 'Communication Services', why: 'Search monopoly + AI + Cloud — dominant platform'    },
+  { symbol: 'MSFT', name: 'Microsoft Corp.',               price: 374.51, type: 'Stock', sector: 'Technology',    why: 'Azure + Office + AI — best enterprise software moat'      },
+  { symbol: 'WMT',  name: 'Walmart Inc.',                  price: 168.43, type: 'Stock', sector: 'Consumer Staples',   why: 'Retail giant + growing e-commerce and ad revenue'          },
+];

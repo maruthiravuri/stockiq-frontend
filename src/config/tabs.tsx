@@ -27,6 +27,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import StarBorderIcon           from '@mui/icons-material/StarBorder';
 import PieChartIcon             from '@mui/icons-material/PieChart';
 import MonetizationOnIcon       from '@mui/icons-material/MonetizationOn';
+import RepeatIcon               from '@mui/icons-material/Repeat';
 
 export interface TabConfig {
   id: string;           // must match key in App.tsx TAB_MAP
@@ -87,6 +88,13 @@ export const TAB_CONFIG: TabConfig[] = [
     label: 'Dividend ETFs',
     description: 'Top 10 best dividend ETFs ranked by yield — SCHD, VYM, JEPI, JEPQ and more. Includes yield, expense ratio, AUM, payout frequency and strategy.',
     icon: <MonetizationOnIcon fontSize="small" />,
+    group: 'Research',
+  },
+  {
+    id: 'recurring',
+    label: 'Recurring',
+    description: 'Handpicked stocks & ETFs for regular DCA investing — VOO, QQQ, SCHD, GLD, COST, GOOGL, MSFT, WMT, SMH and more. Includes a DCA calculator showing exactly how much to buy per position.',
+    icon: <RepeatIcon fontSize="small" />,
     group: 'Research',
   },
   {

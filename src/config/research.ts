@@ -264,3 +264,45 @@ export const SCREENER_SECTORS = [
   'Consumer Staples', 'Consumer Discretionary', 'Communication Services',
   'Industrials', 'Materials', 'Real Estate', 'Utilities',
 ];
+
+// ─────────────────────────────────────────────────────────────
+//  DIVIDEND ETFs
+//  Top dividend-focused ETFs with yield, expense ratio, AUM
+// ─────────────────────────────────────────────────────────────
+
+export interface DividendEtf {
+  symbol: string;
+  name: string;
+  price: number;
+  dividendYield: number;     // annual yield %
+  expenseRatio: number;      // annual expense ratio %
+  aum: number;               // assets under management $
+  frequency: string;         // Monthly | Quarterly
+  focus: string;             // brief strategy description
+  inception: string;         // year
+}
+
+export const DIVIDEND_ETF_SYMBOLS: DividendEtf[] = [
+  { symbol: 'SCHD',  name: 'Schwab US Dividend Equity ETF',     price: 77.42,  dividendYield: 3.5,  expenseRatio: 0.06, aum: 52_000_000_000, frequency: 'Quarterly', focus: 'Quality dividend growers, 100 stocks',      inception: '2011' },
+  { symbol: 'VYM',   name: 'Vanguard High Dividend Yield ETF',   price: 118.34, dividendYield: 2.9,  expenseRatio: 0.06, aum: 48_000_000_000, frequency: 'Quarterly', focus: 'Broad high-yield US equities, 400+ stocks', inception: '2006' },
+  { symbol: 'DVY',   name: 'iShares Select Dividend ETF',        price: 124.18, dividendYield: 4.8,  expenseRatio: 0.38, aum: 18_000_000_000, frequency: 'Quarterly', focus: 'High dividend US stocks screened by payout', inception: '2003' },
+  { symbol: 'DGRO',  name: 'iShares Core Dividend Growth ETF',   price: 57.82,  dividendYield: 2.4,  expenseRatio: 0.08, aum: 26_000_000_000, frequency: 'Quarterly', focus: 'Dividend growth track record 5+ years',     inception: '2014' },
+  { symbol: 'HDV',   name: 'iShares Core High Dividend ETF',     price: 108.47, dividendYield: 3.8,  expenseRatio: 0.08, aum: 10_000_000_000, frequency: 'Quarterly', focus: 'Morningstar Economic Moat screened',        inception: '2011' },
+  { symbol: 'JEPI',  name: 'JPMorgan Equity Premium Income ETF', price: 54.23,  dividendYield: 7.2,  expenseRatio: 0.35, aum: 34_000_000_000, frequency: 'Monthly',   focus: 'S&P 500 + covered calls for income',       inception: '2020' },
+  { symbol: 'JEPQ',  name: 'JPMorgan NASDAQ Equity Premium ETF', price: 52.18,  dividendYield: 9.1,  expenseRatio: 0.35, aum: 15_000_000_000, frequency: 'Monthly',   focus: 'NASDAQ 100 + covered calls for income',    inception: '2022' },
+  { symbol: 'DIVO',  name: 'Amplify CWP Enhanced Dividend ETF',  price: 38.92,  dividendYield: 4.8,  expenseRatio: 0.55, aum: 3_000_000_000,  frequency: 'Monthly',   focus: 'Blue-chip dividend + tactical covered calls', inception: '2016' },
+  { symbol: 'PEY',   name: 'Invesco High Yield Equity Dividend ETF', price: 19.84, dividendYield: 5.2, expenseRatio: 0.52, aum: 1_200_000_000, frequency: 'Monthly',   focus: 'Highest yielding US dividend stocks',       inception: '2004' },
+  { symbol: 'SPHD',  name: 'Invesco S&P 500 High Div Low Vol ETF', price: 42.17, dividendYield: 4.6, expenseRatio: 0.30, aum: 3_800_000_000,  frequency: 'Monthly',   focus: 'High yield + low volatility S&P 500',      inception: '2012' },
+];
+
+// Criteria that define a "top dividend ETF" — shown in the tab header
+export const DIVIDEND_ETF_CRITERIA: TabCriteria = {
+  id: 'dividendetfs',
+  name: 'Top 10 Dividend ETFs',
+  description: 'Best-in-class ETFs for dividend income — screened by yield, expense ratio, AUM and strategy quality.',
+  criteria: [
+    { field: 'dividendYield', operator: '>=', value: 2.4,  label: 'Yield ≥ 2.4%' },
+    { field: 'aum',           operator: '>=', value: 1_000_000_000, label: 'AUM ≥ $1B (established)' },
+    { field: 'expenseRatio',  operator: '<=', value: 0.55, label: 'Expense ratio ≤ 0.55%' },
+  ],
+};

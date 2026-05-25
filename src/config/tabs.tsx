@@ -26,6 +26,7 @@ import FilterAltIcon            from '@mui/icons-material/FilterAlt';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import StarBorderIcon           from '@mui/icons-material/StarBorder';
 import PieChartIcon             from '@mui/icons-material/PieChart';
+import MonetizationOnIcon       from '@mui/icons-material/MonetizationOn';
 
 export interface TabConfig {
   id: string;           // must match key in App.tsx TAB_MAP
@@ -79,6 +80,13 @@ export const TAB_CONFIG: TabConfig[] = [
     label: 'Metals ETFs',
     description: 'Gold, silver and copper ETFs — physical and futures-backed. Live NAV and expense ratios.',
     icon: <DiamondIcon fontSize="small" />,
+    group: 'Research',
+  },
+  {
+    id: 'dividendetfs',
+    label: 'Dividend ETFs',
+    description: 'Top 10 best dividend ETFs ranked by yield — SCHD, VYM, JEPI, JEPQ and more. Includes yield, expense ratio, AUM, payout frequency and strategy.',
+    icon: <MonetizationOnIcon fontSize="small" />,
     group: 'Research',
   },
   {

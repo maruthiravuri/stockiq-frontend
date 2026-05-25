@@ -305,9 +305,9 @@ export const CryptoTab: React.FC = () => {
     const live = quotes?.[i];
     return live ? {
       ...a,
-      price: Number(live.price),
-      change: Number(live.change),
-      changePercent: Number(live.changePercent),
+      price:         Number(live.price)         || a.price         || 0,
+      change:        Number(live.change)         || 0,
+      changePercent: Number(live.changePercent)  || 0,
     } : a;
   });
   const hasLive = !!quotes?.length;
@@ -337,12 +337,12 @@ export const CryptoTab: React.FC = () => {
                     <Typography variant="caption" color="text.secondary">{a.name}</Typography>
                   </Box>
                 </Box>
-                <Chip size="small" label={fmtPct(a.changePercent)}
+                <Chip size="small" label={fmtPct(Number(a.changePercent) || 0)}
                   sx={{ bgcolor: a.changePercent >= 0 ? 'rgba(0,212,170,0.15)' : 'rgba(255,77,106,0.15)',
                         color: a.changePercent >= 0 ? 'success.main' : 'error.main', height: 20, fontSize: '0.65rem' }} />
               </Box>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                {a.price > 1 ? fmtPrice(a.price) : `$${a.price.toFixed(4)}`}
+                {(Number(a.price) || 0) > 1 ? fmtPrice(a.price) : `$${(Number(a.price) || 0).toFixed(4)}`}
               </Typography>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="caption" color="text.secondary">Mkt Cap: {fmtLargeNum(a.marketCap)}</Typography>

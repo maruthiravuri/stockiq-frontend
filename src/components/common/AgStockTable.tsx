@@ -106,6 +106,7 @@ const AgStockTable: React.FC<Props> = ({ data, title, subtitle, showValueCols = 
             rowData={data}
             columnDefs={columnDefs}
             defaultColDef={{ resizable: true }}
+            theme="legacy"
             animateRows
             pagination
             paginationPageSize={50}

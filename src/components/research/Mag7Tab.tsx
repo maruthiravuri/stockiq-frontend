@@ -1,9 +1,10 @@
 import React from 'react';
-import { Box, Grid, Paper, Typography, Chip, CircularProgress, Alert } from '@mui/material';
+import { Box, Paper, Typography, Chip, CircularProgress, Alert } from '@mui/material';
 import { useMag7 } from '../../hooks/useApi';
 import { MAG7_STOCKS } from '../../services/mockData';
 import { fmtPrice, fmtPct, fmtChange, fmtLargeNum } from '../../utils/format';
 import Sparkline from '../common/Sparkline';
+import Grid from '@mui/material/Grid';
 import AgStockTable from '../common/AgStockTable';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -71,7 +72,7 @@ const Mag7Tab: React.FC = () => {
       )}
       <Grid container spacing={1.5}>
         {stocks.map(stock => (
-          <Grid item xs={6} sm={4} md={3} lg={12 / 7 as any} key={stock.symbol}>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }} key={stock.symbol}>
             <StockCard stock={stock} />
           </Grid>
         ))}

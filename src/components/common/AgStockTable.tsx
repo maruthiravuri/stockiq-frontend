@@ -13,6 +13,7 @@ interface Props {
   title: string;
   subtitle?: string;
   showValueCols?: boolean;
+  showExtra?: boolean;
   height?: number;
 }
 

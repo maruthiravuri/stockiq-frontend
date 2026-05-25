@@ -312,7 +312,7 @@ export const CryptoTab: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {assets.map((a: any) => (
-          <Grid item xs={12} sm={6} md={4} key={a.symbol}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={a.symbol}>
             <Paper sx={{ p: 1.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

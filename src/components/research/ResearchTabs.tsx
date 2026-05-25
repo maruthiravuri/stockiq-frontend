@@ -9,6 +9,7 @@ import { useBatchQuotes } from '../../hooks/useApi';
 import {
   SP100_SYMBOLS, SP500_VALUE_SYMBOLS, BUFFETT_SYMBOLS,
   AI_STOCK_SYMBOLS, AI_ETF_SYMBOLS, METALS_ETF_SYMBOLS, CRYPTO_SYMBOLS,
+  TAB_CRITERIA,
 } from '../../config/research';
 import { fmtPrice, fmtPct, fmtLargeNum } from '../../utils/format';
 import StockTable from '../common/StockTable';
@@ -124,14 +125,26 @@ export const SP100Tab: React.FC = () => {
 // ── SP500 Value ───────────────────────────────────────────────────────────────
 export const SP500ValueTab: React.FC = () => {
   const { data: stocks, isLoading, hasLive, isError } = useLiveMerge(SP500_VALUE_SYMBOLS);
+  const criteria = TAB_CRITERIA.sp500value.criteria;
   return (
     <Box sx={{ p: 2, height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>S&P 500 Value Stocks</Typography>
         <LiveBadge isLoading={isLoading} hasLive={hasLive} isError={isError} />
       </Box>
-      <Paper sx={{ flex: 1, minHeight: 500 }}>
-        <StockTable data={stocks as any} title="" subtitle="Filtered by P/E, P/B, dividend yield" showValueCols />
+      {/* Active criteria — edit TAB_CRITERIA.sp500value in src/config/research.ts */}
+      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5, lineHeight: 2 }}>Criteria:</Typography>
+        {criteria.map((c, i) => (
+          <Chip key={i} label={c.label} size="small"
+            sx={{ height: 22, fontSize: '0.68rem', bgcolor: 'rgba(0,212,170,0.1)', color: 'primary.main' }} />
+        ))}
+      </Box>
+      <Typography variant="caption" color="text.secondary">
+        {stocks.length} stocks match · Edit criteria in <code style={{background:'rgba(255,255,255,0.08)',padding:'1px 4px',borderRadius:3}}>src/config/research.ts → TAB_CRITERIA.sp500value</code>
+      </Typography>
+      <Paper sx={{ flex: 1, minHeight: 400 }}>
+        <StockTable data={stocks as any} title="" subtitle="" showValueCols />
       </Paper>
     </Box>
   );

@@ -22,14 +22,14 @@ function mergeWithLive(mockData: any[], liveMap: Record<string, any>) {
     if (!live) return item;
     return {
       ...item,
-      price: Number(live.price),
-      change: Number(live.change),
-      changePercent: Number(live.changePercent),
-      high: Number(live.high ?? item.high),
-      low: Number(live.low ?? item.low),
-      open: Number(live.open ?? item.open),
-      previousClose: Number(live.previousClose ?? item.previousClose),
-      volume: Number(live.volume ?? item.volume),
+      price:         Number(live.price)                    || item.price         || 0,
+      change:        Number(live.change)                   || item.change        || 0,
+      changePercent: Number(live.changePercent)            || item.changePercent || 0,
+      high:          Number(live.high   ?? item.high)      || 0,
+      low:           Number(live.low    ?? item.low)       || 0,
+      open:          Number(live.open   ?? item.open)      || 0,
+      previousClose: Number(live.previousClose ?? item.previousClose) || 0,
+      volume:        Number(live.volume ?? item.volume)    || 0,
     };
   });
 }
@@ -66,9 +66,9 @@ function LiveBadge({ isLoading, hasLive, isError }: { isLoading: boolean; hasLiv
 // ── SP100 Movers ──────────────────────────────────────────────────────────────
 export const SP100Tab: React.FC = () => {
   const { data: stocks, isLoading, isError, hasLive } = useLiveMerge(SP100_SYMBOLS);
-  const sorted = [...stocks].sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
-  const gainers = sorted.filter(s => s.change >= 0).slice(0, 5);
-  const losers  = sorted.filter(s => s.change < 0).slice(0, 5);
+  const sorted = [...stocks].sort((a, b) => Math.abs(Number(b.changePercent) || 0) - Math.abs(Number(a.changePercent) || 0));
+  const gainers = sorted.filter(s => (Number(s.change) || 0) >= 0).slice(0, 5);
+  const losers  = sorted.filter(s => (Number(s.change) || 0) < 0).slice(0, 5);
 
   return (
     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflowY: 'auto' }}>
@@ -108,7 +108,7 @@ export const SP100Tab: React.FC = () => {
                 <YAxis tick={{ fontSize: 8 }} tickFormatter={v => `${v}%`} />
                 <Tooltip formatter={(v: any) => [`${Number(v).toFixed(2)}%`, 'Change']} />
                 <Bar dataKey="v" radius={[2,2,0,0]}>
-                  {sorted.slice(0, 20).map((s, i) => <Cell key={i} fill={s.changePercent >= 0 ? '#00D4AA' : '#FF4D6A'} />)}
+                  {sorted.slice(0, 20).map((s, i) => <Cell key={i} fill={(Number(s.changePercent) || 0) >= 0 ? '#00D4AA' : '#FF4D6A'} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Paper, Typography, Chip, CircularProgress, Alert } from '@mui/material';
 import { useMag7 } from '../../hooks/useApi';
-import { MAG7_STOCKS } from '../../services/mockData';
+import { MAG7_SYMBOLS as MAG7_STOCKS } from '../../config/research';
 import { fmtPrice, fmtPct, fmtChange, fmtLargeNum } from '../../utils/format';
 import Sparkline from '../common/Sparkline';
 import Grid from '@mui/material/Grid';

@@ -8,15 +8,19 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useBatchQuotes } from '../../hooks/useApi';
-import { MAG7_STOCKS, SP100_MOVERS, SP500_VALUE, AI_STOCKS, BUFFETT_PORTFOLIO, METALS_ETFS } from '../../services/mockData';
+import {
+  MAG7_SYMBOLS, SP100_SYMBOLS, SP500_VALUE_SYMBOLS, AI_STOCK_SYMBOLS,
+  BUFFETT_SYMBOLS, METALS_ETF_SYMBOLS,
+  SCREENER_PRESETS, SCREENER_NUMERIC_FIELDS, SCREENER_SECTORS,
+} from '../../config/research';
 import { fmtPrice, fmtPct, fmtLargeNum } from '../../utils/format';
 import AgStockTable from '../common/AgStockTable';
 
 // ── Universe: all symbols from all tabs merged ────────────────────────────────
 const ALL_MOCK = Array.from(
   new Map([
-    ...MAG7_STOCKS, ...SP100_MOVERS, ...SP500_VALUE,
-    ...AI_STOCKS, ...BUFFETT_PORTFOLIO, ...METALS_ETFS,
+    ...MAG7_SYMBOLS, ...SP100_SYMBOLS, ...SP500_VALUE_SYMBOLS,
+    ...AI_STOCK_SYMBOLS, ...BUFFETT_SYMBOLS, ...METALS_ETF_SYMBOLS,
   ].map(s => [s.symbol, s])).values()
 );
 const ALL_SYMBOLS = ALL_MOCK.map(s => s.symbol);
@@ -41,15 +45,7 @@ interface StringFilter {
 
 type Filter = NumericFilter | StringFilter;
 
-const NUMERIC_FIELDS = [
-  { key: 'price',         label: 'Price ($)' },
-  { key: 'changePercent', label: '% Change' },
-  { key: 'marketCap',     label: 'Market Cap ($)' },
-  { key: 'volume',        label: 'Volume' },
-  { key: 'peRatio',       label: 'P/E Ratio' },
-  { key: 'beta',          label: 'Beta' },
-  { key: 'dividendYield', label: 'Dividend Yield (%)' },
-] as const;
+const NUMERIC_FIELDS = SCREENER_NUMERIC_FIELDS;
 
 const SECTORS = [
   'Technology', 'Healthcare', 'Financials', 'Energy',
@@ -57,14 +53,8 @@ const SECTORS = [
   'Industrials', 'Materials', 'Real Estate', 'Utilities',
 ];
 
-const PRESETS: { label: string; filters: Filter[] }[] = [
-  { label: 'High Dividend (>3%)', filters: [{ id:'1', type:'numeric', field:'dividendYield', operator:'>', value:'3' }] },
-  { label: 'Value (P/E < 15)',    filters: [{ id:'1', type:'numeric', field:'peRatio',       operator:'<', value:'15' }] },
-  { label: 'Momentum (>+2%)',     filters: [{ id:'1', type:'numeric', field:'changePercent', operator:'>', value:'2' }] },
-  { label: 'Mega Cap (>$500B)',   filters: [{ id:'1', type:'numeric', field:'marketCap',     operator:'>', value:'500000000000' }] },
-  { label: 'Low Beta (<0.8)',     filters: [{ id:'1', type:'numeric', field:'beta',          operator:'<', value:'0.8' }] },
-  { label: 'Tech Sector',         filters: [{ id:'1', type:'string',  field:'sector',        operator:'is', value:'Technology' }] },
-];
+// Presets from config/research.ts
+const PRESETS = SCREENER_PRESETS;
 
 function applyFilters(stocks: any[], filters: Filter[]): any[] {
   return stocks.filter(stock => filters.every(f => {
@@ -103,7 +93,7 @@ const ScreenerTab: React.FC = () => {
     return ALL_MOCK.map(s => {
       const live = qMap[s.symbol];
       return live ? { ...s, price: Number(live.price), change: Number(live.change),
-        changePercent: Number(live.changePercent), volume: Number(live.volume ?? s.volume) } : s;
+        changePercent: Number(live.changePercent), volume: Number(live.volume ?? (s as any).volume ?? 0) } : s;
     });
   }, [quotes]);
 
@@ -141,7 +131,7 @@ const ScreenerTab: React.FC = () => {
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
         {PRESETS.map(p => (
           <Chip key={p.label} label={p.label} size="small" clickable
-            onClick={() => { setFilters(p.filters); setRan(true); }}
+            onClick={() => { setFilters(p.filters as any); setRan(true); }}
             sx={{ fontSize: '0.72rem', height: 24,
               bgcolor: 'rgba(108,142,239,0.12)', color: 'primary.light',
               '&:hover': { bgcolor: 'rgba(108,142,239,0.22)' } }} />

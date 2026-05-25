@@ -7,9 +7,9 @@ import Grid from '@mui/material/Grid';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useBatchQuotes } from '../../hooks/useApi';
 import {
-  SP100_MOVERS, SP500_VALUE, BUFFETT_PORTFOLIO, AI_STOCKS, AI_ETFS,
-  METALS_ETFS, CRYPTO_ASSETS,
-} from '../../services/mockData';
+  SP100_SYMBOLS, SP500_VALUE_SYMBOLS, BUFFETT_SYMBOLS,
+  AI_STOCK_SYMBOLS, AI_ETF_SYMBOLS, METALS_ETF_SYMBOLS, CRYPTO_SYMBOLS,
+} from '../../config/research';
 import { fmtPrice, fmtPct, fmtLargeNum } from '../../utils/format';
 import StockTable from '../common/StockTable';
 import AgStockTable from '../common/AgStockTable';
@@ -64,7 +64,7 @@ function LiveBadge({ isLoading, hasLive, isError }: { isLoading: boolean; hasLiv
 
 // ── SP100 Movers ──────────────────────────────────────────────────────────────
 export const SP100Tab: React.FC = () => {
-  const { data: stocks, isLoading, isError, hasLive } = useLiveMerge(SP100_MOVERS);
+  const { data: stocks, isLoading, isError, hasLive } = useLiveMerge(SP100_SYMBOLS);
   const sorted = [...stocks].sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
   const gainers = sorted.filter(s => s.change >= 0).slice(0, 5);
   const losers  = sorted.filter(s => s.change < 0).slice(0, 5);
@@ -123,7 +123,7 @@ export const SP100Tab: React.FC = () => {
 
 // ── SP500 Value ───────────────────────────────────────────────────────────────
 export const SP500ValueTab: React.FC = () => {
-  const { data: stocks, isLoading, hasLive, isError } = useLiveMerge(SP500_VALUE);
+  const { data: stocks, isLoading, hasLive, isError } = useLiveMerge(SP500_VALUE_SYMBOLS);
   return (
     <Box sx={{ p: 2, height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -139,7 +139,7 @@ export const SP500ValueTab: React.FC = () => {
 
 // ── Buffett Portfolio ─────────────────────────────────────────────────────────
 export const BuffettTab: React.FC = () => {
-  const { data: stocks, isLoading, hasLive, isError } = useLiveMerge(BUFFETT_PORTFOLIO);
+  const { data: stocks, isLoading, hasLive, isError } = useLiveMerge(BUFFETT_SYMBOLS);
   const alloc = [
     { name: 'AAPL', pct: 44.2 }, { name: 'BAC', pct: 9.3 }, { name: 'AXP', pct: 8.7 },
     { name: 'KO', pct: 7.9 },   { name: 'CVX', pct: 7.2 }, { name: 'OXY', pct: 4.8 },
@@ -196,12 +196,12 @@ export const BuffettTab: React.FC = () => {
 
 // ── AI Stocks & ETFs ──────────────────────────────────────────────────────────
 export const AITab: React.FC = () => {
-  const { data: aiStocks, isLoading, hasLive, isError } = useLiveMerge(AI_STOCKS);
-  const aiEtfSymbols = AI_ETFS.map((e: any) => e.symbol);
+  const { data: aiStocks, isLoading, hasLive, isError } = useLiveMerge(AI_STOCK_SYMBOLS);
+  const aiEtfSymbols = AI_ETF_SYMBOLS.map((e: any) => e.symbol);
   const { data: etfQuotes } = useBatchQuotes(aiEtfSymbols);
   const etfMap = useMemo(() =>
     Object.fromEntries((etfQuotes || []).map(q => [q.symbol, q])), [etfQuotes]);
-  const mergedEtfs = AI_ETFS.map((e: any) => {
+  const mergedEtfs = AI_ETF_SYMBOLS.map((e: any) => {
     const live = etfMap[e.symbol];
     return live ? { ...e, price: Number(live.price), change: Number(live.change), changePercent: Number(live.changePercent) } : e;
   });
@@ -247,7 +247,7 @@ export const AITab: React.FC = () => {
 
 // ── Metals ETFs ───────────────────────────────────────────────────────────────
 export const MetalsTab: React.FC = () => {
-  const { data: etfs, isLoading, hasLive, isError } = useLiveMerge(METALS_ETFS);
+  const { data: etfs, isLoading, hasLive, isError } = useLiveMerge(METALS_ETF_SYMBOLS);
   return (
     <Box sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
@@ -288,7 +288,7 @@ export const CryptoTab: React.FC = () => {
   const { data: quotes, isLoading } = useBatchQuotes(['BTC/USD','ETH/USD','SOL/USD','XRP/USD','ADA/USD']);
 
   // Merge live crypto quotes with mock metadata (for name, rank, marketCap)
-  const assets = CRYPTO_ASSETS.map((a: any, i: number) => {
+  const assets = CRYPTO_SYMBOLS.map((a: any, i: number) => {
     const live = quotes?.[i];
     return live ? {
       ...a,

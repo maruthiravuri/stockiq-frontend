@@ -5,18 +5,7 @@ import { fmtPrice, fmtPct } from '../../utils/format';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
-// Key market indices and ETFs to show in the top bar
-const MARKET_SYMBOLS = ['SPY', 'QQQ', 'DIA', 'IWM', 'GLD', 'TLT', 'VIX'];
-
-const LABELS: Record<string, string> = {
-  SPY: 'S&P 500',
-  QQQ: 'NASDAQ',
-  DIA: 'DOW',
-  IWM: 'Russell 2K',
-  GLD: 'Gold',
-  TLT: '20Y Bond',
-  VIX: 'VIX',
-};
+import { MARKET_BAR_SYMBOLS as MARKET_SYMBOLS, MARKET_BAR_LABELS as LABELS } from '../../config/research';
 
 const MarketBar: React.FC = () => {
   const [time, setTime] = useState(new Date());

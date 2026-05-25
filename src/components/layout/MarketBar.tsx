@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Skeleton } from '@mui/material';
 import { useBatchQuotes } from '../../hooks/useApi';
+import { useAuth } from '../../context/AuthContext';
 import { fmtPrice, fmtPct } from '../../utils/format';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-
-import { MARKET_BAR_SYMBOLS as MARKET_SYMBOLS, MARKET_BAR_LABELS as LABELS } from '../../config/research';
+import { MARKET_BAR_SYMBOLS, MARKET_BAR_LABELS } from '../../config/research';
 
 const MarketBar: React.FC = () => {
   const [time, setTime] = useState(new Date());
-  const { data: quotes, isLoading } = useBatchQuotes(MARKET_SYMBOLS);
+  const { isAuthenticated } = useAuth();
 
-  // Clock tick
+  // Only fetch when authenticated — market API requires JWT
+  const { data: quotes, isLoading } = useBatchQuotes(
+    isAuthenticated ? MARKET_BAR_SYMBOLS : []
+  );
+
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
@@ -29,8 +33,8 @@ const MarketBar: React.FC = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
         <Box sx={{
           width: 7, height: 7, borderRadius: '50%',
-          bgcolor: quotes?.length ? 'success.main' : 'warning.main',
-          animation: 'pulse 2s infinite',
+          bgcolor: quotes?.length ? 'success.main' : 'text.disabled',
+          animation: quotes?.length ? 'pulse 2s infinite' : 'none',
           '@keyframes pulse': { '0%,100%': { opacity: 1 }, '50%': { opacity: 0.3 } },
         }} />
         <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: 1 }}>
@@ -40,28 +44,32 @@ const MarketBar: React.FC = () => {
 
       {/* Market items */}
       {isLoading
-        ? MARKET_SYMBOLS.map(s => (
-            <Skeleton key={s} width={90} height={16} sx={{ bgcolor: 'rgba(255,255,255,0.07)', flexShrink: 0 }} />
+        ? MARKET_BAR_SYMBOLS.map(s => (
+            <Skeleton key={s} width={90} height={16}
+              sx={{ bgcolor: 'rgba(255,255,255,0.07)', flexShrink: 0 }} />
           ))
-        : (quotes ?? []).map(q => (
-            <Box key={q.symbol} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, whiteSpace: 'nowrap', flexShrink: 0 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                {LABELS[q.symbol] ?? q.symbol}
-              </Typography>
-              <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                {fmtPrice(Number(q.price))}
-              </Typography>
-              {Number(q.changePercent) >= 0
-                ? <TrendingUpIcon sx={{ fontSize: 12, color: 'success.main' }} />
-                : <TrendingDownIcon sx={{ fontSize: 12, color: 'error.main' }} />}
-              <Typography variant="caption" sx={{
-                color: Number(q.changePercent) >= 0 ? 'success.main' : 'error.main',
-                fontWeight: 600,
-              }}>
-                {fmtPct(Number(q.changePercent))}
-              </Typography>
-            </Box>
-          ))}
+        : (quotes ?? []).map(q => {
+            const pct = Number(q.changePercent) || 0;
+            const price = Number(q.price) || 0;
+            return (
+              <Box key={q.symbol} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                  {MARKET_BAR_LABELS[q.symbol] ?? q.symbol}
+                </Typography>
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                  {fmtPrice(price)}
+                </Typography>
+                {pct >= 0
+                  ? <TrendingUpIcon sx={{ fontSize: 12, color: 'success.main' }} />
+                  : <TrendingDownIcon sx={{ fontSize: 12, color: 'error.main' }} />}
+                <Typography variant="caption" sx={{
+                  color: pct >= 0 ? 'success.main' : 'error.main', fontWeight: 600,
+                }}>
+                  {fmtPct(pct)}
+                </Typography>
+              </Box>
+            );
+          })}
 
       {/* Clock */}
       <Box sx={{ ml: 'auto', flexShrink: 0 }}>

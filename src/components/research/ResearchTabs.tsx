@@ -103,7 +103,7 @@ export const SP100Tab: React.FC = () => {
           <Paper sx={{ p: 1.5 }}>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>% Move Heatmap — Top 20</Typography>
             <ResponsiveContainer width="100%" height={140}>
-              <BarChart data={sorted.slice(0, 20).map(s => ({ name: s.symbol, v: parseFloat(s.changePercent.toFixed(2)) }))}>
+              <BarChart data={sorted.slice(0, 20).map(s => ({ name: s.symbol, v: parseFloat((Number(s.changePercent) || 0).toFixed(2)) }))}>
                 <XAxis dataKey="name" tick={{ fontSize: 8 }} />
                 <YAxis tick={{ fontSize: 8 }} tickFormatter={v => `${v}%`} />
                 <Tooltip formatter={(v: any) => [`${Number(v).toFixed(2)}%`, 'Change']} />

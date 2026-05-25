@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import { Box, Typography, Chip } from '@mui/material';
@@ -7,6 +8,9 @@ import { Stock } from '../../types';
 import { fmtPrice, fmtLargeNum, fmtVolume } from '../../utils/format';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+
+// Register all AG Grid Community modules (required in v35+)
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 interface Props {
   data: Stock[];
@@ -18,7 +22,7 @@ interface Props {
 }
 
 const ChangeRenderer = (params: any) => {
-  const val = params.value ?? 0;
+  const val = Number(params.value) || 0;
   const isUp = val >= 0;
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', color: isUp ? '#00D4AA' : '#FF4D6A' }}>
@@ -46,8 +50,11 @@ const AgStockTable: React.FC<Props> = ({ data, title, subtitle, showValueCols = 
       { field: 'price', headerName: 'Price', width: 110, sortable: true,
         valueFormatter: (p: any) => fmtPrice(p.value), cellStyle: { fontWeight: 600 } },
       { field: 'change', headerName: 'Change', width: 110, sortable: true,
-        valueFormatter: (p: any) => p.value >= 0 ? `+$${p.value.toFixed(2)}` : `-$${Math.abs(p.value).toFixed(2)}`,
-        cellClass: (p: any) => p.value >= 0 ? 'ag-cell-positive' : 'ag-cell-negative' },
+        valueFormatter: (p: any) => {
+          const v = Number(p.value) || 0;
+          return v >= 0 ? `+$${v.toFixed(2)}` : `-$${Math.abs(v).toFixed(2)}`;
+        },
+        cellClass: (p: any) => (Number(p.value) || 0) >= 0 ? 'ag-cell-positive' : 'ag-cell-negative' },
       { field: 'changePercent', headerName: '% Change', width: 120, sortable: true, cellRenderer: ChangeRenderer, sort: 'desc' },
       { field: 'volume', headerName: 'Volume', width: 110, sortable: true,
         valueFormatter: (p: any) => fmtVolume(p.value), cellStyle: { color: '#8B93A5' } },
@@ -56,11 +63,11 @@ const AgStockTable: React.FC<Props> = ({ data, title, subtitle, showValueCols = 
     ];
     if (showValueCols) {
       base.push(
-        { field: 'peRatio', headerName: 'P/E', width: 80, sortable: true, valueFormatter: (p: any) => p.value ? p.value.toFixed(1) : '—' },
-        { field: 'pbRatio', headerName: 'P/B', width: 80, sortable: true, valueFormatter: (p: any) => p.value ? p.value.toFixed(1) : '—' },
+        { field: 'peRatio',       headerName: 'P/E',      width: 80,  sortable: true, valueFormatter: (p: any) => p.value ? Number(p.value).toFixed(1) : '—' },
+        { field: 'pbRatio',       headerName: 'P/B',      width: 80,  sortable: true, valueFormatter: (p: any) => p.value ? Number(p.value).toFixed(1) : '—' },
         { field: 'dividendYield', headerName: 'Div Yield', width: 100, sortable: true,
-          valueFormatter: (p: any) => p.value ? `${p.value.toFixed(2)}%` : '—',
-          cellClass: (p: any) => (p.value ?? 0) > 3 ? 'ag-cell-positive' : '' }
+          valueFormatter: (p: any) => p.value ? `${Number(p.value).toFixed(2)}%` : '—',
+          cellClass: (p: any) => (Number(p.value) || 0) > 3 ? 'ag-cell-positive' : '' }
       );
     }
     return base;
@@ -74,7 +81,8 @@ const AgStockTable: React.FC<Props> = ({ data, title, subtitle, showValueCols = 
             <Typography variant="h4" sx={{ fontWeight: 700 }}>{title}</Typography>
             {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
           </Box>
-          <Chip label={`${data.length} securities`} size="small" variant="outlined" sx={{ borderColor: 'divider', fontSize: '0.7rem' }} />
+          <Chip label={`${data.length} securities`} size="small" variant="outlined"
+            sx={{ borderColor: 'divider', fontSize: '0.7rem' }} />
         </Box>
       )}
       <Box sx={{ flex: 1, minHeight: height }}>
